@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Kill Switch Panel</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Kill Switch Panel</h1>
+    <button id="settingsBtn" title="Server settings">⚙</button>
+  </header>
+
+  <section id="settingsPanel" class="hidden">
+    <label>Server URL</label>
+    <input id="serverUrl" type="text" placeholder="https://your-server.example.com" />
+    <label>Admin Token</label>
+    <input id="adminToken" type="password" placeholder="Admin token" />
+    <button id="saveSettings">Save</button>
+  </section>
+
+  <section id="addSitePanel">
+    <h2>Add a site</h2>
+    <input id="newName" type="text" placeholder="Client name" />
+    <input id="newUrl" type="text" placeholder="https://clientsite.com" />
+    <select id="newPlatform">
+      <option value="wordpress">WordPress</option>
+      <option value="shopify">Shopify</option>
+    </select>
+    <button id="addSiteBtn">Add site</button>
+  </section>
+
+  <section id="sitesPanel">
+    <h2>Your sites</h2>
+    <div id="sitesList"></div>
+  </section>
+
+  <div id="toast" class="hidden"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
