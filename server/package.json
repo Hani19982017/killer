@@ -1,8 +1,11 @@
 {
   "name": "kill-switch-server",
   "version": "1.0.0",
-  "description": "Central status API to remotely enable/disable client websites (WordPress & Shopify)",
+  "description": "Central status API to remotely enable/disable client websites (WordPress, Shopify, static), with data persisted in a GitHub repo",
   "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js"
