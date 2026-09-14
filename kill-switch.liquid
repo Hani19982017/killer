@@ -1,0 +1,83 @@
+{% comment %}
+  Remote Kill Switch — Shopify
+  ----------------------------
+  Paste this snippet's content right before </body> in theme.liquid
+  (Online Store > Themes > Edit code > layout/theme.liquid)
+
+  IMPORTANT LIMITATION:
+  Shopify is a closed hosted platform — a theme snippet cannot take the
+  store offline at the server level the way a WordPress mu-plugin can.
+  This snippet blocks the storefront from the VISITOR'S side: it shows a
+  full-screen "unavailable" overlay and blocks scrolling/interaction so
+  effectively no one can browse or buy. It does not stop Shopify itself
+  from serving the page, and a technically savvy visitor could still see
+  page source. For a true platform-level lock you'd need to password-
+  protect the store from Shopify Admin (Online Store > Preferences) or
+  build a custom app with Admin API access — happy to help with that too
+  if you need it.
+{% endcomment %}
+
+<script>
+(function () {
+  var KS_API_URL = 'https://your-server.example.com/api/status';
+  var KS_SITE_ID = 'REPLACE_WITH_SITE_ID';
+  var KS_SITE_KEY = 'REPLACE_WITH_SITE_KEY';
+  var KS_CHECK_INTERVAL_SECONDS = 5; // how often to poll for changes (lower = feels more instant, slightly more requests)
+
+  function showOverlay(message) {
+    if (document.getElementById('ks-overlay')) return;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'ks-overlay';
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:2147483647',
+      'background:#0f1115', 'color:#eee',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'text-align:center', 'padding:20px', 'font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif'
+    ].join(';');
+
+    overlay.innerHTML =
+      '<div style="max-width:480px">' +
+        '<h1 style="font-size:22px;margin-bottom:10px;">We\'ll be right back</h1>' +
+        '<p style="color:#aaa;line-height:1.5;">' + (message || 'This store is temporarily unavailable.') + '</p>' +
+      '</div>';
+
+    document.documentElement.style.overflow = 'hidden';
+    document.body.appendChild(overlay);
+  }
+
+  function removeOverlay() {
+    var el = document.getElementById('ks-overlay');
+    if (el) el.remove();
+    document.documentElement.style.overflow = '';
+  }
+
+  function checkStatus() {
+    var url = KS_API_URL + '/' + encodeURIComponent(KS_SITE_ID) + '?key=' + encodeURIComponent(KS_SITE_KEY);
+
+    fetch(url, { cache: 'no-store' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.status === 'off') {
+          showOverlay(data.message);
+          sessionStorage.setItem('ks_status', 'off');
+        } else {
+          removeOverlay();
+          sessionStorage.setItem('ks_status', 'on');
+        }
+      })
+      .catch(function () {
+        // Network/API issue: fail open (don't block real customers over a hiccup)
+        removeOverlay();
+      });
+  }
+
+  // Show overlay immediately from cache (avoids a flash of the store before the check completes)
+  if (sessionStorage.getItem('ks_status') === 'off') {
+    showOverlay();
+  }
+
+  checkStatus();
+  setInterval(checkStatus, KS_CHECK_INTERVAL_SECONDS * 1000);
+})();
+</script>
