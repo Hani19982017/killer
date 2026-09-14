@@ -9,16 +9,6 @@
       "status": "off",
       "maintenanceMessage": "This site is temporarily unavailable. Please check back soon.",
       "createdAt": "2026-09-14T11:20:51.637Z"
-    },
-    {
-      "id": "f4ac456b82d5",
-      "key": "e2b58d1938bbc3164a96d19be5803854",
-      "name": "Test Store",
-      "url": "https://mystore.myshopify.com",
-      "platform": "shopify",
-      "status": "on",
-      "maintenanceMessage": "This site is temporarily unavailable. Please check back soon.",
-      "createdAt": "2026-09-14T13:51:30.078Z"
     }
   ]
 }
