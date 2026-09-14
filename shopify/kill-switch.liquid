@@ -22,7 +22,7 @@
   var KS_API_URL = 'https://your-server.example.com/api/status';
   var KS_SITE_ID = 'REPLACE_WITH_SITE_ID';
   var KS_SITE_KEY = 'REPLACE_WITH_SITE_KEY';
-  var KS_CACHE_MINUTES = 1; // how long to trust a cached "on" result before re-checking
+  var KS_CHECK_INTERVAL_SECONDS = 5; // how often to poll for changes (lower = feels more instant, slightly more requests)
 
   function showOverlay(message) {
     if (document.getElementById('ks-overlay')) return;
@@ -78,6 +78,6 @@
   }
 
   checkStatus();
-  setInterval(checkStatus, KS_CACHE_MINUTES * 60 * 1000);
+  setInterval(checkStatus, KS_CHECK_INTERVAL_SECONDS * 1000);
 })();
 </script>

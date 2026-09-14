@@ -48,7 +48,10 @@ async function api(pathname, options = {}) {
   return res.json();
 }
 
+let currentSites = [];
+
 function renderSites(sites) {
+  currentSites = sites;
   sitesList.innerHTML = '';
 
   if (!sites.length) {
@@ -76,6 +79,7 @@ function renderSites(sites) {
             ? `<button class="btn-toggle-off" data-action="off" data-id="${site.id}">Disable site</button>`
             : `<button class="btn-toggle-on" data-action="on" data-id="${site.id}">Enable site</button>`
         }
+        <button data-action="download" data-id="${site.id}">Download config file</button>
         <button class="btn-danger" data-action="delete" data-id="${site.id}">Remove</button>
       </div>
     `;
@@ -114,6 +118,25 @@ sitesList.addEventListener('click', async (e) => {
       if (!confirm('Remove this site from the panel? (This does not delete the site itself.)')) return;
       await api(`/api/admin/sites/${id}`, { method: 'DELETE' });
       showToast('Site removed');
+    } else if (action === 'download') {
+      const site = currentSites.find((s) => s.id === id);
+      if (!site) return;
+      const { serverUrl } = getSettings();
+
+      const result = await window.electronAPI.generateFile({
+        platform: site.platform,
+        serverUrl,
+        id: site.id,
+        key: site.key,
+        siteName: site.name,
+      });
+
+      if (result.success) {
+        showToast('Saved: ' + result.filePath);
+      } else if (!result.canceled) {
+        showToast('Could not save the file');
+      }
+      return; // no need to reload sites after a download
     }
     loadSites();
   } catch (err) {

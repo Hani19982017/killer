@@ -1,33 +1,67 @@
-# Shopify Kill Switch — Setup
+# Kill Switch System
 
-## Important
-Shopify is a closed hosted platform, so this is a **client-side (front-end) block**,
-not a true server-level shutdown. It shows a full-screen overlay to every visitor
-and stops them interacting with the store. It's effective for "the customer can't
-browse or buy," but it is not equivalent to the WordPress version, which stops the
-server from rendering the page at all.
+Remotely enable/disable client websites (WordPress or Shopify) from a desktop
+app on your machine, with one click.
 
-If you need a true platform-level lock, the options are:
-- Manually toggle **Online Store > Preferences > Password protection** from Shopify Admin.
-- Build a private custom app with Admin API access to automate that toggle — ask me if you want this built too.
+## How it fits together
 
-## 1. Register the site on your server
-```bash
-curl -X POST https://your-server.example.com/api/admin/sites \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Client Shop","url":"https://clientshop.myshopify.com","platform":"shopify"}'
 ```
-Save the returned `id` and `key`.
+[Electron App on your PC]  --admin token-->  [Node.js Status Server]  <--polls status-->  [Client Site: WP plugin / Shopify snippet]
+```
 
-## 2. Add the snippet to the theme
-1. Shopify Admin → Online Store → Themes → **Edit code**.
-2. Open `layout/theme.liquid`.
-3. Paste the contents of `kill-switch.liquid` right before `</body>`.
-4. Replace `KS_API_URL`, `KS_SITE_ID`, and `KS_SITE_KEY` with your real values.
-5. Save.
+1. **server/** — a small Node/Express API that stores each site's on/off status.
+   You run this on your own hosting/VPS (or even locally with a tunnel, though a
+   small VPS is more reliable).
+2. **wordpress-plugin/** — a must-use WordPress plugin you install on each
+   WordPress client site. It polls the server and shows a maintenance page
+   when disabled.
+3. **shopify/** — a theme snippet for Shopify stores. It polls the server and
+   shows a blocking overlay when disabled (see its README for the platform
+   limitation vs. WordPress).
+4. **electron-app/** — the desktop app you open in VS Code / run locally.
+   It's your "remote control": add sites, and flip each one on/off with a button.
 
-## 3. Test
-- Toggle the site "off" in your Electron app.
-- Reload the storefront — the overlay should appear within ~1 minute.
-- Toggle back "on" and confirm it clears.
+## Setup order
+
+### 1. Deploy the server
+```bash
+cd server
+cp .env.example .env
+# edit .env and set a strong ADMIN_TOKEN
+npm install
+npm start
+```
+Deploy this to any Node-friendly host (a small VPS, Railway, Render, etc.) so
+it's reachable over HTTPS from both your client sites and your Electron app.
+Put it behind HTTPS (e.g. via Caddy/Nginx + Let's Encrypt, or your host's
+built-in TLS) since the admin token travels in the Authorization header.
+
+### 2. Run the Electron control panel
+```bash
+cd electron-app
+npm install
+npm start
+```
+On first launch, click the ⚙ icon and enter your server's URL and the
+`ADMIN_TOKEN` you set in step 1.
+
+### 3. Add each client site from the Electron app
+Fill in name, URL, and platform, click "Add site". Note the `id`/`key` this
+generates for that site (visible via the server's `/api/admin/sites` endpoint
+or your own logs) — you need both for step 4.
+
+### 4. Wire up the client site
+- WordPress → follow `wordpress-plugin/README.md`
+- Shopify → follow `shopify/README.md`
+
+### 5. Test
+Toggle a site off from the Electron panel and confirm it goes into maintenance
+mode within about a minute; toggle back on and confirm it recovers.
+
+## A note on using this responsibly
+This is effectively a licensing/enforcement mechanism for sites you built and
+maintain for clients (e.g. to enforce a hosting/maintenance contract). To keep
+things clean and avoid disputes:
+- Disclose this capability in your contract/terms with the client up front.
+- Keep the admin token private — anyone with it can disable any site you've registered.
+- Consider logging toggle events (who/when) if you have multiple team members using the panel.

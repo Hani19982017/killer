@@ -98,5 +98,27 @@ function ks_render_maintenance_page() {
         p{color:#aaa;line-height:1.5;}
     </style></head><body>';
     echo '<div class="box"><h1>We\'ll be right back</h1><p>' . esc_html($message) . '</p></div>';
+
+    // Auto-recover: if a visitor is sitting on this maintenance page when the
+    // site gets re-enabled, reload automatically — no manual refresh needed.
+    $status_url = KS_API_URL . '/' . rawurlencode(KS_SITE_ID) . '?key=' . rawurlencode(KS_SITE_KEY);
+    echo '<script>
+    (function () {
+      var KS_STATUS_URL = ' . json_encode($status_url) . ';
+      var KS_CHECK_INTERVAL_SECONDS = 5;
+      function check() {
+        fetch(KS_STATUS_URL, { cache: "no-store" })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.status === "on") {
+              location.reload();
+            }
+          })
+          .catch(function () {});
+      }
+      setInterval(check, KS_CHECK_INTERVAL_SECONDS * 1000);
+    })();
+    </script>';
+
     echo '</body></html>';
 }

@@ -21,7 +21,7 @@
   var KS_API_URL = 'https://killer-in8z.onrender.com/api/status';
   var KS_SITE_ID = 'REPLACE_WITH_SITE_ID';
   var KS_SITE_KEY = 'REPLACE_WITH_SITE_KEY';
-  var KS_CHECK_INTERVAL_MINUTES = 1;
+  var KS_CHECK_INTERVAL_SECONDS = 5; // how often to poll for changes (lower = feels more instant, slightly more requests)
   // ------------------------------------------------------------------
 
   function showOverlay(message) {
@@ -80,5 +80,5 @@
   }
 
   checkStatus();
-  setInterval(checkStatus, KS_CHECK_INTERVAL_MINUTES * 60 * 1000);
+  setInterval(checkStatus, KS_CHECK_INTERVAL_SECONDS * 1000);
 })();

@@ -1,14 +1,3 @@
 {
-  "sites": [
-    {
-      "id": "9fcbbb6fd2c7",
-      "key": "4aac5f429e62f958f2065e8bcf15602e",
-      "name": "bm",
-      "url": "https://palegreen-goat-871483.hostingersite.com",
-      "platform": "static",
-      "status": "off",
-      "maintenanceMessage": "This site is temporarily unavailable. Please check back soon.",
-      "createdAt": "2026-09-14T14:00:55.830Z"
-    }
-  ]
+  "sites": []
 }
